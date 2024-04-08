@@ -64,7 +64,7 @@ def movies():
         movies = db.session.execute(db.select(MovieInfo)).scalars()
         movie_data = []
         
-        for movie in movie:
+        for movie in movies:
             movie_data.append({
                 "id": movie.id, 
                 "title": movie.title, 
@@ -72,15 +72,7 @@ def movies():
                 "poster": url_for('getImage', filename=movie.poster)
             })
         
-        return jsonify({ 
-            "movies": [
-            { 
-                "id": 1, 
-                "title": "The movie title", 
-                "description": "The summary for the movie", 
-                "poster": "/api/v1/posters/movie-poster.jpg", 
-            }]
-        })
+        return jsonify(data=movie_data)
 
 
 @app.route('/api/v1/csrf-token', methods=['GET']) 

@@ -28,7 +28,6 @@
 <template>    
     <main class="container py-5">
         <h1>Movies</h1>
-        <hr>
         <div id="movies">
             <Card :movie="movie" v-for="movie in movies" :key="movie.id" />
         </div>

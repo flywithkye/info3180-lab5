@@ -7,7 +7,8 @@ This file creates your application.
 
 import os, datetime
 from app import app, db
-from flask import render_template, request, jsonify, send_file, session, abort, send_from_directory
+from flask import render_template, request, jsonify, url_for, send_file, session, abort, send_from_directory
+from flask_wtf.csrf import generate_csrf
 from werkzeug.utils import secure_filename
 from app.models import MovieInfo
 from app.forms import MovieForm
@@ -21,7 +22,7 @@ from app.forms import MovieForm
 def index():
     return jsonify(message="This is the beginning of our API")
 
-@app.route('/api/v1/movies', methods=['POST'])
+@app.route('/api/v1/movies', methods=['POST', 'GET'])
 def movies():
     # Instantiate your form class    
     form = MovieForm()
@@ -41,7 +42,7 @@ def movies():
                 title = title,
                 description = description,
                 poster = posterurl,
-                created_at = datetime.now()
+                created_at = datetime.datetime.now()
             )
             
             db.session.add(movie)
@@ -59,7 +60,36 @@ def movies():
                     form_errors(form)
                 ] 
             })
+    if request.method == 'GET':
+        movies = db.session.execute(db.select(MovieInfo)).scalars()
+        movie_data = []
+        
+        for movie in movie:
+            movie_data.append({
+                "id": movie.id, 
+                "title": movie.title, 
+                "description": movie.description, 
+                "poster": url_for('getImage', filename=movie.poster)
+            })
+        
+        return jsonify({ 
+            "movies": [
+            { 
+                "id": 1, 
+                "title": "The movie title", 
+                "description": "The summary for the movie", 
+                "poster": "/api/v1/posters/movie-poster.jpg", 
+            }]
+        })
 
+
+@app.route('/api/v1/csrf-token', methods=['GET']) 
+def get_csrf(): 
+    return jsonify({'csrf_token': generate_csrf()}) 
+
+@app.route("/api/v1/images/<path:filename>")
+def getImage(filename):
+    return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
 
 ###
 # The functions below should be applicable to all Flask apps.

@@ -20,6 +20,7 @@ const router = createRouter({
     },
     {
       path: '/movies/create',
+      name: 'addmovie',
       component: AddMovieFormView
     }
   ]
